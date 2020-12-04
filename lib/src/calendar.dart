@@ -763,7 +763,7 @@ class _TableCalendarState extends State<TableCalendar>
       return widget.builders.dayBuilder(
           context, date, widget.calendarController.visibleEvents[eventKey]);
     } else {
-      return _CellWidget(
+      return CellWidget(
         text: '${date.day}',
         isUnavailable: tIsUnavailable,
         isSelected: tIsSelected,
