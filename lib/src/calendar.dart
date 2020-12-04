@@ -581,7 +581,7 @@ class _TableCalendarState extends State<TableCalendar>
             ? widget.daysOfWeekStyle.dowTextBuilder(date, widget.locale)
             : DateFormat.E(widget.locale).format(date);
         final isWeekend =
-            widget.calendarController._isWeekend(date, widget.weekendDays);
+            widget.calendarController.isWeekend(date, widget.weekendDays);
 
         if (isWeekend && widget.builders.dowWeekendBuilder != null) {
           return widget.builders.dowWeekendBuilder(context, weekdayString);
@@ -623,7 +623,7 @@ class _TableCalendarState extends State<TableCalendar>
 
   Widget _buildCell(DateTime date) {
     if (!widget.calendarStyle.outsideDaysVisible &&
-        widget.calendarController._isExtraDay(date) &&
+        widget.calendarController.isExtraDay(date) &&
         widget.calendarController.calendarFormat == CalendarFormat.month) {
       return Container();
     }
@@ -701,11 +701,11 @@ class _TableCalendarState extends State<TableCalendar>
     final tIsUnavailable = _isDayUnavailable(date);
     final tIsSelected = widget.calendarController.isSelected(date);
     final tIsToday = widget.calendarController.isToday(date);
-    final tIsOutside = widget.calendarController._isExtraDay(date);
+    final tIsOutside = widget.calendarController.isExtraDay(date);
     final tIsHoliday = widget.calendarController.visibleHolidays
         .containsKey(_getHolidayKey(date));
     final tIsWeekend =
-        widget.calendarController._isWeekend(date, widget.weekendDays);
+        widget.calendarController.isWeekend(date, widget.weekendDays);
     final tIsEventDay =
         widget.calendarController.visibleEvents.containsKey(eventKey);
 

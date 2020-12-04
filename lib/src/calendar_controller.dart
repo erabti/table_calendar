@@ -37,7 +37,7 @@ class CalendarController {
   /// List of currently visible days.
   List<DateTime> get visibleDays =>
       calendarFormat == CalendarFormat.month && !_includeInvisibleDays
-          ? _visibleDays.value.where((day) => !_isExtraDay(day)).toList()
+          ? _visibleDays.value.where((day) => !isExtraDay(day)).toList()
           : _visibleDays.value;
 
   /// `Map` of currently visible events.
@@ -49,7 +49,7 @@ class CalendarController {
     return Map.fromEntries(
       _events.entries.where((entry) {
         for (final day in visibleDays) {
-          if (_isSameDay(day, entry.key)) {
+          if (isSameDay(day, entry.key)) {
             return true;
           }
         }
@@ -68,7 +68,7 @@ class CalendarController {
     return Map.fromEntries(
       _holidays.entries.where((entry) {
         for (final day in visibleDays) {
-          if (_isSameDay(day, entry.key)) {
+          if (isSameDay(day, entry.key)) {
             return true;
           }
         }
@@ -132,8 +132,8 @@ class CalendarController {
 
     if (onVisibleDaysChanged != null) {
       _visibleDays.addListener(() {
-        if (!_isSameDay(_visibleDays.value.first, _previousFirstDay) ||
-            !_isSameDay(_visibleDays.value.last, _previousLastDay)) {
+        if (!isSameDay(_visibleDays.value.first, _previousFirstDay) ||
+            !isSameDay(_visibleDays.value.last, _previousLastDay)) {
           _previousFirstDay = _visibleDays.value.first;
           _previousLastDay = _visibleDays.value.last;
           onVisibleDaysChanged(
@@ -442,35 +442,35 @@ class CalendarController {
 
   DateTime _getEventKey(DateTime day) {
     return visibleEvents.keys
-        .firstWhere((it) => _isSameDay(it, day), orElse: () => null);
+        .firstWhere((it) => isSameDay(it, day), orElse: () => null);
   }
 
   DateTime _getHolidayKey(DateTime day) {
     return visibleHolidays.keys
-        .firstWhere((it) => _isSameDay(it, day), orElse: () => null);
+        .firstWhere((it) => isSameDay(it, day), orElse: () => null);
   }
 
   /// Returns true if `day` is currently selected.
   bool isSelected(DateTime day) {
-    return _isSameDay(day, selectedDay);
+    return isSameDay(day, selectedDay);
   }
 
   /// Returns true if `day` is the same day as `DateTime.now()`.
   bool isToday(DateTime day) {
-    return _isSameDay(day, DateTime.now());
+    return isSameDay(day, DateTime.now());
   }
 
-  bool _isSameDay(DateTime dayA, DateTime dayB) {
+  bool isSameDay(DateTime dayA, DateTime dayB) {
     return dayA.year == dayB.year &&
         dayA.month == dayB.month &&
         dayA.day == dayB.day;
   }
 
-  bool _isWeekend(DateTime day, List<int> weekendDays) {
+  bool isWeekend(DateTime day, List<int> weekendDays) {
     return weekendDays.contains(day.weekday);
   }
 
-  bool _isExtraDay(DateTime day) {
+  bool isExtraDay(DateTime day) {
     return _isExtraDayBefore(day) || _isExtraDayAfter(day);
   }
 
