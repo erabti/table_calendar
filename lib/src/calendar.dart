@@ -713,7 +713,9 @@ class _TableCalendarState extends State<TableCalendar>
         widget.builders.unavailableDayBuilder != null && tIsUnavailable;
     final isSelected =
         widget.builders.selectedDayBuilder != null && tIsSelected;
-    final isToday = widget.builders.todayDayBuilder != null && tIsToday;
+    final isToday = (widget.builders.todayDayBuilder != null ||
+            widget.builders.todayDayWidgetBuilder != null) &&
+        tIsToday;
     final isOutsideHoliday = widget.builders.outsideHolidayDayBuilder != null &&
         tIsOutside &&
         tIsHoliday;
@@ -732,6 +734,18 @@ class _TableCalendarState extends State<TableCalendar>
         tIsWeekend &&
         !tIsHoliday;
 
+    final cell = _CellWidget(
+      text: '${date.day}',
+      isUnavailable: tIsUnavailable,
+      isSelected: tIsSelected,
+      isToday: tIsToday,
+      isWeekend: tIsWeekend,
+      isOutsideMonth: tIsOutside,
+      isHoliday: tIsHoliday,
+      isEventDay: tIsEventDay,
+      calendarStyle: widget.calendarStyle,
+    );
+
     if (isUnavailable) {
       return widget.builders.unavailableDayBuilder(
           context, date, widget.calendarController.visibleEvents[eventKey]);
@@ -739,6 +753,13 @@ class _TableCalendarState extends State<TableCalendar>
       return widget.builders.selectedDayBuilder(
           context, date, widget.calendarController.visibleEvents[eventKey]);
     } else if (isToday) {
+      final widgetBuilder = widget.builders.todayDayWidgetBuilder;
+      if (widgetBuilder != null)
+        return widgetBuilder(
+          context,
+          date,
+          cell,
+        );
       return widget.builders.todayDayBuilder(
           context, date, widget.calendarController.visibleEvents[eventKey]);
     } else if (isSelected) {
@@ -763,17 +784,7 @@ class _TableCalendarState extends State<TableCalendar>
       return widget.builders.dayBuilder(
           context, date, widget.calendarController.visibleEvents[eventKey]);
     } else {
-      return CellWidget(
-        text: '${date.day}',
-        isUnavailable: tIsUnavailable,
-        isSelected: tIsSelected,
-        isToday: tIsToday,
-        isWeekend: tIsWeekend,
-        isOutsideMonth: tIsOutside,
-        isHoliday: tIsHoliday,
-        isEventDay: tIsEventDay,
-        calendarStyle: widget.calendarStyle,
-      );
+      return cell;
     }
   }
 

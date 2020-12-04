@@ -3,7 +3,7 @@
 
 part of table_calendar;
 
-class CellWidget extends StatelessWidget {
+class _CellWidget extends StatelessWidget {
   final String text;
   final bool isUnavailable;
   final bool isSelected;
@@ -14,7 +14,7 @@ class CellWidget extends StatelessWidget {
   final bool isEventDay;
   final CalendarStyle calendarStyle;
 
-  const CellWidget({
+  const _CellWidget({
     Key key,
     @required this.text,
     this.isUnavailable = false,

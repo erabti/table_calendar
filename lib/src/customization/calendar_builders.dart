@@ -9,6 +9,9 @@ part of table_calendar;
 typedef FullBuilder = Widget Function(
     BuildContext context, DateTime date, List events);
 
+typedef FullWidgetBuilder = Widget Function(
+    BuildContext context, DateTime date, Widget widget);
+
 /// Builder signature for a list of event markers. Contains `date` and list of all `events` associated with that `date`.
 /// Both `events` and `holidays` params can be null.
 typedef FullListBuilder = List<Widget> Function(
@@ -34,6 +37,8 @@ class CalendarBuilders {
 
   /// Custom Builder for today. Will overwrite `dayBuilder` on today.
   final FullBuilder todayDayBuilder;
+  final FullWidgetBuilder todayDayWidgetBuilder;
+
 
   /// Custom Builder for holidays. Will overwrite `dayBuilder` on holidays.
   final FullBuilder holidayDayBuilder;
@@ -80,6 +85,7 @@ class CalendarBuilders {
     this.dayBuilder,
     this.selectedDayBuilder,
     this.todayDayBuilder,
+    this.todayDayWidgetBuilder,
     this.holidayDayBuilder,
     this.weekendDayBuilder,
     this.outsideDayBuilder,
