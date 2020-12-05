@@ -567,7 +567,7 @@ class _TableCalendarState extends State<TableCalendar>
 
     return Table(
       // Makes this Table fill its parent horizontally
-      defaultColumnWidth: FractionColumnWidth(1.0 / daysInWeek),
+      defaultColumnWidth: FlexColumnWidth(),
       children: children,
     );
   }
