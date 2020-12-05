@@ -23,6 +23,8 @@ typedef String TextBuilder(DateTime date, dynamic locale);
 /// Signature for enabling days.
 typedef bool EnabledDayPredicate(DateTime day);
 
+typedef WidgetsModifier = List<Widget> Function(List<Widget>);
+
 /// Format to display the `TableCalendar` with.
 enum CalendarFormat { month, twoWeeks, week }
 
@@ -68,6 +70,10 @@ class TableCalendar extends StatefulWidget {
   /// `Map` of events.
   /// Each `DateTime` inside this `Map` should get its own `List` of objects (i.e. events).
   final Map<DateTime, List> events;
+
+  final WidgetsModifier modifyDaysList;
+  final WidgetsModifier modifyWeekDayList;
+  final int addedModifierCells;
 
   /// `Map` of holidays.
   /// This property allows you to provide custom holiday rules.
@@ -175,6 +181,9 @@ class TableCalendar extends StatefulWidget {
     Key key,
     @required this.calendarController,
     this.locale,
+    this.modifyDaysList,
+    this.modifyWeekDayList,
+    this.addedModifierCells = 0,
     this.events = const {},
     this.holidays = const {},
     this.onDaySelected,
@@ -275,13 +284,13 @@ class _TableCalendarState extends State<TableCalendar>
 
   void _selectPrevious() {
     setState(() {
-      widget.calendarController._selectPrevious();
+      widget.calendarController.selectPrevious();
     });
   }
 
   void _selectNext() {
     setState(() {
-      widget.calendarController._selectNext();
+      widget.calendarController.selectNext();
     });
   }
 
@@ -551,60 +560,66 @@ class _TableCalendarState extends State<TableCalendar>
   }
 
   Widget _buildTable() {
-    final daysInWeek = 7;
+    final daysInWeek = 7 + widget.addedModifierCells;
     final children = <TableRow>[
       if (widget.calendarStyle.renderDaysOfWeek) _buildDaysOfWeek(),
     ];
 
     int x = 0;
     while (x < widget.calendarController._visibleDays.value.length) {
-      children.add(_buildTableRow(widget.calendarController._visibleDays.value
-          .skip(x)
-          .take(daysInWeek)
-          .toList()));
+      children.add(
+        _buildTableRow(
+            widget.calendarController._visibleDays.value
+                .skip(x)
+                .take(daysInWeek)
+                .toList(),
+            widget.modifyDaysList),
+      );
       x += daysInWeek;
     }
 
     return Table(
       // Makes this Table fill its parent horizontally
-      defaultColumnWidth: FractionColumnWidth(1.0 / daysInWeek),
+      defaultColumnWidth: FractionColumnWidth(1.0 / (daysInWeek)),
       children: children,
     );
   }
 
   TableRow _buildDaysOfWeek() {
+    final cells =
+        widget.calendarController._visibleDays.value.take(7).map((date) {
+      final weekdayString = widget.daysOfWeekStyle.dowTextBuilder != null
+          ? widget.daysOfWeekStyle.dowTextBuilder(date, widget.locale)
+          : DateFormat.E(widget.locale).format(date);
+      final isWeekend =
+          widget.calendarController.isWeekend(date, widget.weekendDays);
+
+      if (isWeekend && widget.builders.dowWeekendBuilder != null) {
+        return widget.builders.dowWeekendBuilder(context, weekdayString);
+      }
+      if (widget.builders.dowWeekdayBuilder != null) {
+        return widget.builders.dowWeekdayBuilder(context, weekdayString);
+      }
+      return Center(
+        child: Text(
+          weekdayString,
+          style: isWeekend
+              ? widget.daysOfWeekStyle.weekendStyle
+              : widget.daysOfWeekStyle.weekdayStyle,
+        ),
+      );
+    }).toList();
     return TableRow(
       decoration: widget.daysOfWeekStyle.decoration,
-      children:
-          widget.calendarController._visibleDays.value.take(7).map((date) {
-        final weekdayString = widget.daysOfWeekStyle.dowTextBuilder != null
-            ? widget.daysOfWeekStyle.dowTextBuilder(date, widget.locale)
-            : DateFormat.E(widget.locale).format(date);
-        final isWeekend =
-            widget.calendarController.isWeekend(date, widget.weekendDays);
-
-        if (isWeekend && widget.builders.dowWeekendBuilder != null) {
-          return widget.builders.dowWeekendBuilder(context, weekdayString);
-        }
-        if (widget.builders.dowWeekdayBuilder != null) {
-          return widget.builders.dowWeekdayBuilder(context, weekdayString);
-        }
-        return Center(
-          child: Text(
-            weekdayString,
-            style: isWeekend
-                ? widget.daysOfWeekStyle.weekendStyle
-                : widget.daysOfWeekStyle.weekdayStyle,
-          ),
-        );
-      }).toList(),
+      children: widget.modifyWeekDayList?.call(cells) ?? cells,
     );
   }
 
-  TableRow _buildTableRow(List<DateTime> days) {
+  TableRow _buildTableRow(List<DateTime> days, [WidgetsModifier modifier]) {
+    final cells = days.map((date) => _buildTableCell(date)).toList();
     return TableRow(
       decoration: widget.calendarStyle.contentDecoration,
-      children: days.map((date) => _buildTableCell(date)).toList(),
+      children: modifier?.call(cells) ?? cells,
     );
   }
 
